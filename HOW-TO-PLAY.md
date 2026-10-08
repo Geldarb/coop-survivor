@@ -33,6 +33,7 @@ Tip: `...?join=CODE` at the end of the game URL pre-fills the code for your frie
 | Pause (Solo only) | **Esc** or **P** |
 
 Spells aim and cast automatically. Hexed Daggers fly in the direction you last moved.
+Toasts ("... can evolve!") wait while a chest reveal or the level-up cards are open, so they never cover them.
 
 ## Rules
 - In co-op the host has a **blue** ring and name, the guest **orange**. Both players can pick the same hero; the
@@ -58,7 +59,10 @@ Spells aim and cast automatically. Hexed Daggers fly in the direction you last m
 - Recipes appear on the level-up cards ("Evolves into ... at Lv 6 with ...") and in the **Grimoire**. A toast tells
   you when a spell is ready to evolve.
 
-## Spells (up to 6 per player, each up to level 6)
+## Spells (18 in total; up to 6 per player, each up to level 6)
+Level-ups offer spells from the full pool of 18. Each player still has **6 spell slots and 6 item slots**, so
+every run is a different mix.
+
 | Spell | What it does | Paired item | Evolution | Evolved effect |
 |---|---|---|---|---|
 | Spark Bolt | Bolts at the nearest enemy | Tome of Swiftcasting | **Arc Lance** | Faster golden bolts with more pierce; every hit chains lightning to 3 nearby enemies |
@@ -71,8 +75,16 @@ Spells aim and cast automatically. Hexed Daggers fly in the direction you last m
 | Frost Shard | Ice shards that chill (-50% speed) | Elixir of Renewal | **Winter's Heart** | Freezes enemies solid for 1.2 s; shards shatter into 3 splinters |
 | Will-o'-Wisps | Homing wisps | Lodestone Charm | **Lantern Host** | Wisps never fade on hit, and every kill sparks a new wisp |
 | Thornseed Pouch | Bramble patches that slow and cut | Ironbark Cloak | **Elderwood Grove** | Bigger groves that root enemies and creep after the nearest foe |
+| Glimmerstone | A stone that ricochets from enemy to enemy (3 to 7 bounces) | Hexed Die | **Shatterstorm** | +3 bounces, harder hits, and every bounce sheds a smaller stone that ricochets on its own |
+| Moonblade Crescent | A boomerang crescent that cuts on the way out and back | Mooncharm Locket | **Eclipse Glaive** | A huge glaive that hangs at the end of its flight, spinning in place and dragging enemies into its edge |
+| Quake Rune | A shockwave ring around you that hurls enemies back | Runed Gauntlet | **Titan's Tremor** | Wider rings, two aftershocks, and every wave stuns |
+| Raven Familiar | Ravens circle you and dive at nearby enemies | Raven's Feather | **Nightwing Flock** | +2 ravens; each dive strikes an area and marks enemies to take 35% more damage from everything |
+| Sunbeam Sigil | Rotating sunbeams sweep around you like a lighthouse | Echo Prism | **Solar Lattice** | +1 beam; beams are 40% longer and wider and set enemies alight |
+| Starfall | Marks spots on enemies, then stars crash down on them | Astronomer's Star Chart | **Comet Storm** | Every impact stuns; every third cast drops a great comet on the thickest crowd |
+| Witchbrew Flask | Lobbed flasks that burst into lingering poison clouds | Nightshade Sprig | **Plague Cauldron** | Bigger, stronger clouds; enemies that die inside burst into new clouds |
+| Mirror Ward | Orbiting mirrors that cut enemies and block enemy projectiles | Silver Hand Mirror | **Hall of Mirrors** | +1 bigger mirror; blocked shots are reflected as homing light, and mirrors flash light bolts at nearby enemies |
 
-## Items (up to 6 per player, level 5 max unless noted)
+## Items (18 in total; up to 6 per player, level 5 max unless noted)
 | Item | Per level |
 |---|---|
 | Tome of Swiftcasting | -8% spell cooldowns |
@@ -85,7 +97,14 @@ Spells aim and cast automatically. Hexed Daggers fly in the direction you last m
 | Elixir of Renewal | +0.4 HP per second |
 | Lodestone Charm | +30% pickup radius |
 | Ironbark Cloak | -1 damage taken per hit |
-| Echo Prism (max 2) | +1 projectile / book / strike for every spell |
+| Echo Prism (max 2) | +1 projectile / book / strike / beam for every spell |
+| Hexed Die | +5% critical chance (critical hits deal double damage, shown as orange "!" numbers) |
+| Mooncharm Locket | +10% luck (4th level-up card, better chests, more drops) |
+| Runed Gauntlet | +25% knockback and +5% damage |
+| Raven's Feather | +12% Crowns earned this run |
+| Astronomer's Star Chart | +8% XP |
+| Silver Hand Mirror | +5% chance to dodge a hit completely |
+| Nightshade Sprig | +15% damage over time (burning, bleeding, poison) |
 
 When every slot is full and maxed, level-ups offer **Pouch of Crowns** (+25 Crowns) or a **Healing Draught** (+40 HP).
 
@@ -104,6 +123,8 @@ Robe colour shows the house. Achievement-locked heroes can also be bought outrig
 | Tobias Reedwater | Tidecrest | Lightning Charm | +15% area, +10% duration | 1000 Crowns |
 | Old Fennick (caretaker) | Faculty | Random spell | +50% luck, +25% Crowns | Evolve any spell, **or** 1200 Crowns |
 | Prof. Elowen Thistle | Faculty | Warding Circle | +40 max HP, +1 armour | Survive 5:00, **or** 1500 Crowns |
+| Rook Ashgrave | Duskmoth | Raven Familiar | +10% critical chance | 1800 Crowns |
+| Prof. Astra Vale | Faculty | Starfall | +20% area, +10% XP | Evolve 5 spells (in total), **or** 2500 Crowns |
 | Archmage Corvin Starling | Faculty | Orbiting Spellbooks | +1 projectile for every spell, +10% damage | Defeat an Ember Drake, **or** 3000 Crowns |
 
 The houses are **Emberfox** (orange, the fox), **Tidecrest** (teal, the wave), **Thornvale** (green, the oak) and
