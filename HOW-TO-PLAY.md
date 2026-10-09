@@ -30,10 +30,24 @@ Tip: `...?join=CODE` at the end of the game URL pre-fills the code for your frie
 | Pick a level-up card | Click a card, or press **1 / 2 / 3 / 4** |
 | Reroll the level-up cards | **R** or the Reroll button (needs Reroll Scrolls) |
 | Claim a treasure chest | **Enter / Space / E** or the Claim button |
-| Pause (Solo only) | **Esc** or **P** |
+| Pause (Solo only) | The **Pause** button (top right, under Kills/Crowns; tap on touch screens), or **Esc** / **P** |
 
 Spells aim and cast automatically. Hexed Daggers fly in the direction you last moved.
 Toasts ("... can evolve!") wait while a chest reveal or the level-up cards are open, so they never cover them.
+
+## Pausing (Solo only)
+- The **Pause** button, **Esc** or **P** freeze the whole run: creatures, spells, cooldowns, spawns and the timer. Resume
+  continues exactly where you left off.
+- The pause menu shows your run so far (time, kills, level, Crowns earned) and your current spells and items with
+  their levels. It has three buttons:
+  - **Resume**.
+  - **Restart run** (asks first).
+  - **Quit to menu** (asks first).
+
+  Restarting or quitting still awards the Crowns earned so far, exactly as a normal end of run would.
+- Solo runs pause automatically when you switch tabs, minimise the window or click away from it.
+- The button is hidden while level-up cards or a chest are open, because the game is already waiting for you then.
+- Co-op games can't be paused (there's no button), so keep an eye on your partner.
 
 ## Rules
 - In co-op the host has a **blue** ring and name, the guest **orange**. Both players can pick the same hero; the

@@ -112,6 +112,21 @@
   .citem.evo{background:linear-gradient(#fff4cf,#f0cf73);animation:pop .5s ease-out both,glow 1.4s ease-in-out .5s infinite}
   .citem.evo .t{color:#7b2430;font-size:17px}
   #bChestClaim{position:relative;margin-top:12px}
+  #bPause{position:fixed;top:72px;right:10px;z-index:5;min-width:0;margin:0;padding:6px 12px 6px 10px;font-size:13px;display:flex;align-items:center;gap:7px;
+    background:linear-gradient(rgba(62,45,29,.92),rgba(37,26,16,.92));border-color:#8a6a2f;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+  #bPause i{display:inline-block;width:10px;height:12px;border-left:3.5px solid #f0d38a;border-right:3.5px solid #f0d38a;box-sizing:border-box}
+  #pause{z-index:12;background:rgba(10,7,4,.72)}
+  #pause .panel{width:min(560px,94vw)}
+  #pauseStats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:6px 0 10px}
+  #pauseStats div{background:rgba(0,0,0,.25);border:1px solid #4a3a24;border-radius:6px;padding:6px 4px;font-size:13px;color:#b9a47c}
+  #pauseStats b{display:block;font-size:19px;color:#f6ead0;font-family:Cinzel,serif}
+  .pbuild{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:4px 0}
+  .pbuild span{display:flex;align-items:center;gap:5px;background:rgba(0,0,0,.25);border:1px solid #4a3a24;border-radius:6px;padding:3px 8px 3px 4px;font-size:13px;color:#dcc9a3}
+  .pbuild span.ev{border-color:#c79a3e;color:#f3d07a}
+  .pbuild canvas{background:#120c07;border-radius:4px}
+  .plabel{font-family:Cinzel,serif;font-size:12px;color:#c9ad72;letter-spacing:1px;margin-top:8px}
+  #pauseConfirm{margin-top:10px;padding:10px;border:1px solid #8a6a2f;border-radius:8px;background:rgba(0,0,0,.3)}
+  #pauseConfirmText{font-size:15px;color:#efe2c4;margin-bottom:4px}
 </style>
 </head>
 <body>
@@ -229,6 +244,27 @@
     <div class="tabs" id="codexTabs"><button data-tab="w" class="on">Spells</button><button data-tab="p">Items</button><button data-tab="e">Evolutions</button><button data-tab="m">Bestiary</button><button data-tab="h">Houses</button></div>
     <div class="grid" id="codexGrid"></div>
     <button id="bCodexDone">Done</button>
+  </div>
+</div>
+
+<button id="bPause" class="hidden" tabindex="-1" aria-label="Pause game" title="Pause (Esc / P)"><i></i>Pause</button>
+
+<div id="pause" class="overlay hidden">
+  <div class="panel">
+    <h2 style="font-size:30px;margin-bottom:4px">Paused</h2>
+    <div class="sub" style="margin-bottom:8px">The night holds its breath. Press Esc or P to resume.</div>
+    <div id="pauseStats"></div>
+    <div class="plabel">SPELLS</div><div class="pbuild" id="pauseSpells"></div>
+    <div class="plabel">ITEMS</div><div class="pbuild" id="pauseItems"></div>
+    <div class="row" id="pauseBtns" style="margin-top:12px">
+      <button id="bResume" tabindex="-1">Resume</button>
+      <button id="bPRestart" class="ghost" tabindex="-1">Restart run</button>
+      <button id="bPQuit" class="ghost" tabindex="-1">Quit to menu</button>
+    </div>
+    <div id="pauseConfirm" class="hidden">
+      <div id="pauseConfirmText"></div>
+      <div class="row"><button id="bPYes" tabindex="-1">Yes</button><button id="bPNo" class="ghost" tabindex="-1">Cancel</button></div>
+    </div>
   </div>
 </div>
 
@@ -494,10 +530,11 @@ addEventListener('keydown', e => {
     if (['Digit1', 'Digit2', 'Digit3', 'Digit4', 'Numpad1', 'Numpad2', 'Numpad3', 'Numpad4'].includes(e.code)) choosePick(+e.code.slice(-1) - 1);
     if (e.code === 'KeyR') reroll();
   }
-  if ((e.code === 'Escape' || e.code === 'KeyP') && mode === 'solo' && S && !S.over) userPause = !userPause;
+  if ((e.code === 'Escape' || e.code === 'KeyP') && !e.repeat && mode === 'solo' && S && !S.over) { if (userPause) setPause(false); else if (canPause()) setPause(true); }
 });
 addEventListener('keyup', e => { keys[e.code] = false; });
-addEventListener('blur', () => { for (const k in keys) keys[k] = false; touch = null; });
+addEventListener('blur', () => { for (const k in keys) keys[k] = false; touch = null; autoPause(); });
+document.addEventListener('visibilitychange', () => { if (document.hidden) autoPause(); });
 cv.addEventListener('pointerdown', e => { touch = { ox: e.clientX, oy: e.clientY, x: e.clientX, y: e.clientY }; });
 addEventListener('pointermove', e => { if (touch) { touch.x = e.clientX; touch.y = e.clientY; } });
 addEventListener('pointerup', () => { touch = null; });
@@ -539,6 +576,10 @@ function newPlayer(id, name, prof) {
 function goldFor(p) {
   const time = Math.floor(S.time / 60 * 25), kills = Math.floor(p.kills / 10), level = S.lv * 3, coins = p.coins;
   return { time, kills, level, coins, greed: Math.round(p.st.greed * 100) / 100, total: Math.round((time + kills + level + coins) * p.st.greed) };
+}
+function runStats() {
+  return { runId: S.runId, time: S.time, lv: S.lv, kills: S.kills, drakes: S.drakes,
+    players: S.players.map(p => ({ id: p.id, name: p.name, char: p.char, kills: p.kills, dmg: Math.round(p.dmg), w: { ...p.w }, ps: { ...p.ps }, evo: Object.keys(p.evo), chests: p.chests, gold: goldFor(p) })) };
 }
 function refreshStats(p) { p.st = pstat(p); p.mh = p.st.maxHp; p.spd = p.st.spd; p.pick = p.st.pick; p.ar = p.st.area; p.am = p.st.amount; if (p.hp > p.mh) p.hp = p.mh; }
 function xpNeed(l, np) { return Math.floor((2 + l * 1.2 + Math.pow(l, 1.4)) * (np > 1 ? 1.25 : 1)); }
@@ -1280,8 +1321,7 @@ function step(dt) {
 
   if (P.every(p => p.dead)) {
     S.over = true;
-    S.stats = { runId: S.runId, time: S.time, lv: S.lv, kills: S.kills, drakes: S.drakes,
-      players: P.map(p => ({ id: p.id, name: p.name, char: p.char, kills: p.kills, dmg: Math.round(p.dmg), w: { ...p.w }, ps: { ...p.ps }, evo: Object.keys(p.evo), chests: p.chests, gold: goldFor(p) })) };
+    S.stats = runStats();
   }
 }
 
@@ -1416,13 +1456,13 @@ function startOnline() {
   send({ t: 'start' }); showScreen(null);
 }
 function startSolo() {
-  mode = 'solo'; myId = 0; userPause = false; resetRunUI();
+  mode = 'solo'; myId = 0; setPause(false); resetRunUI();
   S = newState([newPlayer(0, myName(), myProf())]); showScreen(null);
 }
 function restartGame() {
   const P = S.players;
   S = newState(P.map(p => newPlayer(p.id, p.name, p.id ? partnerProf : myProf())));
-  netEvents = []; userPause = false; resetRunUI();
+  netEvents = []; setPause(false); resetRunUI();
 }
 function buildSnap() {
   const e = [], pr = [], g = [], z = [], q = [];
@@ -1526,7 +1566,7 @@ function netLost(msg) {
 }
 function backToMenu(msg) {
   teardown();
-  mode = 'menu'; S = null; C.latest = null; C.snaps = []; goShownFor = null; shownCid = -1; userPause = false;
+  mode = 'menu'; S = null; C.latest = null; C.snaps = []; goShownFor = null; shownCid = -1; setPause(false);
   showScreen('menu'); menuNotice(msg || '');
 }
 
@@ -2242,7 +2282,6 @@ function drawHUD(V, me) {
   ctx.globalAlpha = 1;
   const mine = me && ((me.ch && me.cid !== pickedCid) || (me.chest && me.chest.id !== claimedChest));
   if (V.paused && !V.over && !mine) banner('Waiting for your partner (level-up / chest)...');
-  if (mode === 'solo' && userPause) banner('PAUSED - press Esc to resume');
 }
 function banner(text) {
   ctx.font = 'bold 22px ' + FONT; ctx.textAlign = 'center';
@@ -2613,6 +2652,56 @@ try { $('name').value = localStorage.getItem('coopsurv-name') || ''; } catch (e)
 const urlCode = new URLSearchParams(location.search).get('join'); if (urlCode) $('joinCode').value = urlCode.toUpperCase();
 addEventListener('beforeunload', () => { if (conn && conn.open) { try { conn.send(JSON.stringify({ t: 'bye' })); } catch (e) {} } });
 
+// ---------- solo pause (button, Esc/P, auto-pause on blur / hidden tab) ----------
+let pauseConfirm = null, pauseBtnShown = null;
+function canPause() { return mode === 'solo' && S && !S.over && !userPause && $('levelup').classList.contains('hidden') && $('chest').classList.contains('hidden') && $('gameover').classList.contains('hidden'); }
+function setPause(on) {
+  userPause = !!on; acc = 0;
+  for (const k in keys) keys[k] = false; touch = null;
+  pauseConfirm = null; $('pauseConfirm').classList.add('hidden'); $('pauseBtns').classList.remove('hidden');
+  if (userPause) renderPause();
+  $('pause').classList.toggle('hidden', !userPause);
+  updatePauseBtn();
+}
+function autoPause() { if (canPause()) setPause(true); }
+function updatePauseBtn() {
+  const show = canPause();
+  if (show !== pauseBtnShown) { pauseBtnShown = show; $('bPause').classList.toggle('hidden', !show); }
+}
+function renderPause() {
+  const p = S.players[0], g = goldFor(p);
+  $('pauseStats').innerHTML = `<div>Time<b>${fmtTime(S.time)}</b></div><div>Kills<b>${S.kills}</b></div><div>Level<b>${S.lv}</b></div><div title="Crowns you would earn if the run ended now">${CUR} earned<b class="gold">${g.total}</b></div>`;
+  const fill = (id, keysObj, kind) => { const el = $(id); el.innerHTML = '';
+    const ks = Object.keys(keysObj); if (!ks.length) { el.innerHTML = '<span>none yet</span>'; return; }
+    for (const k of ks) { const ev = kind === 'w' && p.evo[k], sp = document.createElement('span'); if (ev) sp.className = 'ev';
+      sp.appendChild(iconCanvas(k, 22, !!ev)); sp.appendChild(document.createTextNode((kind === 'w' ? (ev ? WD[k].en + ' \u2605' : WD[k].n) : PD[k].n) + ' ' + (ev ? '' : 'Lv ' + keysObj[k]))); el.appendChild(sp); } };
+  fill('pauseSpells', p.w, 'w'); fill('pauseItems', p.ps, 'p');
+}
+function askPause(kind) {
+  const g = goldFor(S.players[0]).total;
+  pauseConfirm = kind;
+  $('pauseConfirmText').innerHTML = (kind === 'restart' ? 'Restart this run from the beginning?' : 'End this run and return to the main menu?')
+    + `<br><span style="font-size:14px;color:#b9a47c">The <span class="gold">${g}</span> ${CUR} earned so far will be added to your purse, as at the end of a normal run.</span>`;
+  $('bPYes').textContent = kind === 'restart' ? 'Yes, restart' : 'Yes, quit';
+  $('pauseBtns').classList.add('hidden'); $('pauseConfirm').classList.remove('hidden');
+}
+function endSoloRun(kind) {
+  if (!(mode === 'solo' && S)) return;
+  const aw = awardRun(runStats());
+  const msg = aw ? `Run ended at ${fmtTime(S.time)}: +${aw.gold} ${CUR} added to your purse.` + (aw.unlocked.length ? ' Unlocked: ' + aw.unlocked.join(', ') + '!' : '') : '';
+  if (kind === 'restart') { startSolo(); if (msg) toast(msg.replace('Run ended at', 'Previous run ended at'), '#f3d07a', 4); }
+  else { backToMenu(''); if (msg) menuNotice(msg, true); }
+}
+const noFocus = el => { el.addEventListener('mousedown', e => e.preventDefault()); el.addEventListener('pointerup', () => el.blur()); };
+for (const id of ['bPause', 'bResume', 'bPRestart', 'bPQuit', 'bPYes', 'bPNo']) noFocus($(id));
+$('bPause').addEventListener('click', e => { e.stopPropagation(); if (canPause()) setPause(true); });
+$('bPause').addEventListener('pointerdown', e => e.stopPropagation());
+$('bResume').onclick = () => setPause(false);
+$('bPRestart').onclick = () => askPause('restart');
+$('bPQuit').onclick = () => askPause('quit');
+$('bPNo').onclick = () => { pauseConfirm = null; $('pauseConfirm').classList.add('hidden'); $('pauseBtns').classList.remove('hidden'); };
+$('bPYes').onclick = () => { const k = pauseConfirm; if (k) endSoloRun(k); };
+
 // ====================================================================
 //  MAIN LOOP
 // ====================================================================
@@ -2631,10 +2720,11 @@ function tick(dt, now) {
     if (now - lastInput >= INPUT_MS) { lastInput = now; sendInput(); }
   }
   netWatch(now);
-  updateFx(dt);
+  if (!(mode === 'solo' && userPause)) updateFx(dt);   // floating numbers, toasts and effects freeze with the game
 }
 function frame(now) {
   requestAnimationFrame(frame);
+  updatePauseBtn();
   const dt = Math.min(.1, Math.max(0, (now - lastT) / 1000)); lastT = now;
   try { tick(dt, now); render(now / 1000, dt); } catch (e) { console.error(e); }
 }
